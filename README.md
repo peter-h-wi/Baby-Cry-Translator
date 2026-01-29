@@ -18,15 +18,23 @@ We employ a **"Hybrid"** approach to handle the cold-start problem of data short
 
 ---
 
-## 🏗 System Architecture
+## 📱 App-First Architecture (Baby Station vs Parent Station)
 
-1.  **Preprocessing**: Resample to 16kHz, Mono, Pad to 5s.
-2.  **Data Augmentation**: Noise injection & Pitch shifting (Essential for minority classes).
-3.  **Feature Engineering**:
-    *   **Phase 1**: MFCC extraction (13 coeffs).
-    *   **Phase 2**: Mel-Spectrogram generation (64 mels).
-4.  **Inference**:
-    *   The system can run on Edge devices (CCTV/Mobile) due to lightweight architecture.
+We simulate a "Smart Baby Monitor" system using two browser tabs or devices.
+
+### 1. Baby Station (The Listener)
+*   Place this device near the crib.
+*   **Function**: Listens continuously, detects cries, and uploads events.
+*   **Simulation**: Click "Simulate Cry Event" to generate a test alert.
+
+### 2. Parent Station (The Receiver)
+*   Parent carries this device.
+*   **Function**: Receives push notifications (Auto-refresh) and allows Feedback.
+*   **Feedback Loop**:
+    *   **[✅]**: Confirm the prediction.
+    *   **[❌]**: Correct the label (e.g., "Hungry" -> "Diaper"). This creates the "Golden Data" for Phase 2.
+
+---
 
 ## 📦 Installation
 
@@ -36,18 +44,17 @@ pip install -r requirements.txt
 
 ## 🏃‍♂️ Usage
 
-### Train Baseline (Random Forest)
+### Run the App
 ```bash
-python3 main.py
+streamlit run app.py
 ```
+Open two browser tabs pointing to `http://localhost:8501`. Set one to **Baby Station** and the other to **Parent Station**.
 
-### Train Advanced (CNN)
+### Train Models
 ```bash
+# Baseline
+python3 main.py
+
+# Advanced (CNN)
 python3 -m src.train_cnn
 ```
-
-## 🚀 Future Improvements
-
-1.  **Real-Time Inference**: Connect microphone for live prediction.
-2.  **Product Integration**: API for Mobile App/CCTV to send audio and receive feedback.
-3.  **Continuous Learning**: Server pipeline to ingest feedback data and retrain the CNN nightly.
