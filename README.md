@@ -2,52 +2,31 @@
 
 A Python-based machine learning model to translate baby cries into 5 categories: **Hungry, Tired, Belly Pain, Discomfort, Burping**.
 
-## 🧠 How It Works
+## 🧠 Hybrid AI Strategy (The Roadmap)
 
-The system follows a standard audio classification pipeline:
+We employ a **"Hybrid"** approach to handle the cold-start problem of data shortage.
 
-1.  **Data Loading (`src/train.py`)**
-    *   Loads `.wav` files from `data/raw`.
-    *   Automatically maps folder names to labels (e.g., `hungry` -> 0).
+### Phase 1: Launch (Current)
+*   **Engine**: **Random Forest Classifier** (`src/train.py`)
+*   **Why**: It is robust on small datasets (< 1000 samples) and handles class imbalance well using statistical features (MFCCs).
+*   **Performance**: ~72% Accuracy (Stable).
 
-2.  **Preprocessing (`src/preprocess.py`)**
-    *   **Resampling**: Converts all audio to **16,000 Hz** (standard for speech/human audio).
-    *   **Mono Conversion**: Mixes stereo audio to a single channel.
-    *   **Padding/Truncating**: forces every clip to be exactly **5.0 seconds** long.
+### Phase 2: Evolution (Future)
+*   **Engine**: **CNN (Convolutional Neural Network)** (`src/train_cnn.py`)
+*   **Why**: As users correct predictions (Feedback Loop), data volume grows. Deep Learning (CNN) outperforms statistical models when data is abundant (> 10k samples) by seeing time-frequency patterns.
+*   **Performance**: Currently ~36% (due to data shortage), but expected to surpass Phase 1 with more data.
 
-3.  **Data Augmentation (`src/augment.py`)**
-    *   *Solves the "Hungry Class Dominance" problem.*
-    *   Identify minority classes (Tired, Belly Pain, etc.).
-    *   Create new samples by:
-        *   **Adding Noise**: Simulates background static.
-        *   **Pitch Shifting**: Changes the pitch up/down by 2 steps.
-    *   This balances the dataset so the model doesn't just guess "Hungry" every time.
+---
 
-4.  **Feature Extraction (`src/features.py`)**
-    *   **MFCCs (Mel-Frequency Cepstral Coefficients)**: Extracts 13 coefficients that represent the "timbre" or "shape" of the sound.
-    *   We average these over time to get a single vector of numbers for each file.
+## 🏗 System Architecture
 
-5.  **Modeling (`src/train.py`)**
-    *   **Random Forest Classifier**: A robust algorithm that uses multiple decision trees.
-    *   **Balanced Weights**: Penalizes mistakes on the minority classes more heavily.
-
-## 🚀 Future Improvements (Roadmap)
-
-### 1. Advanced Modeling (Deep Learning)
-*   **CNN (Convolutional Neural Networks)**: Instead of averaging MFCCs, treat the MFCC spectrogram as an *image* and feed it into a CNN. This captures time-varying patterns (e.g., the *rhythm* of the cry).
-*   **RNN/LSTM**: Good for sequential data, can learn the evolution of the cry over time.
-*   **Transformer (AST)**: State-of-the-art for audio classification.
-
-### 2. Real-Time Inference
-*   Create a script (`predict.py`) that uses a microphone to record 5 seconds and predicts instantly.
-*   Build a **Streamlit** or **Gradio** web app for an easy UI.
-
-### 3. Data Expansion
-*   The current dataset is very small for "Burping" and "Belly Pain".
-*   Crowdsourcing or finding more datasets (e.g., from YouTube or Donate-A-Cry campaigns) is critical for reliability.
-
-### 4. Mobile App
-*   Convert the model to **TensorFlow Lite** or **CoreML** (for iOS) to run directly on a phone without internet.
+1.  **Preprocessing**: Resample to 16kHz, Mono, Pad to 5s.
+2.  **Data Augmentation**: Noise injection & Pitch shifting (Essential for minority classes).
+3.  **Feature Engineering**:
+    *   **Phase 1**: MFCC extraction (13 coeffs).
+    *   **Phase 2**: Mel-Spectrogram generation (64 mels).
+4.  **Inference**:
+    *   The system can run on Edge devices (CCTV/Mobile) due to lightweight architecture.
 
 ## 📦 Installation
 
@@ -57,6 +36,18 @@ pip install -r requirements.txt
 
 ## 🏃‍♂️ Usage
 
+### Train Baseline (Random Forest)
 ```bash
 python3 main.py
 ```
+
+### Train Advanced (CNN)
+```bash
+python3 -m src.train_cnn
+```
+
+## 🚀 Future Improvements
+
+1.  **Real-Time Inference**: Connect microphone for live prediction.
+2.  **Product Integration**: API for Mobile App/CCTV to send audio and receive feedback.
+3.  **Continuous Learning**: Server pipeline to ingest feedback data and retrain the CNN nightly.
